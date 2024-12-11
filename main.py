@@ -1,4 +1,4 @@
-import flet as ft
+from flet import *
 
 def main(page: ft.Page):
     page.title = "Task Manager"
