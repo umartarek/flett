@@ -225,22 +225,19 @@ jobs:
           libxi-dev \
           xorg-dev
 
-    - name: Install Android Studio
+    - name: Install Flutter Manually
       run: |
-        sudo mkdir -p /opt/android-studio
-        wget https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.2.1.23/android-studio-2023.2.1.23-linux.tar.gz
-        sudo tar -xzf android-studio-2023.2.1.23-linux.tar.gz -C /opt/android-studio --strip-components=1
-        echo "ANDROID_HOME=/opt/android-studio" >> $GITHUB_ENV
-        echo "PATH=$PATH:/opt/android-studio/bin" >> $GITHUB_ENV
+        # Download Flutter
+        wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.13.0-stable.tar.xz
+        sudo tar -xf flutter_linux_3.13.0-stable.tar.xz -C /opt/
+        echo "PATH=/opt/flutter/bin:$PATH" >> $GITHUB_ENV
+        echo "/opt/flutter/bin" >> $GITHUB_PATH
 
-    - name: Verify Android Studio Installation
+    - name: Verify Flutter Installation
       run: |
-        /opt/android-studio/bin/studio.sh --version || echo "Android Studio version not found"
-
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: 'stable'
+        flutter doctor -v
+        flutter channel stable
+        flutter upgrade
 
     - name: Setup Python
       uses: actions/setup-python@v5
@@ -251,11 +248,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-
-    - name: Configure Flutter
-      run: |
-        flutter doctor --android-licenses
-        flutter doctor -v
 
     - name: Flet Build APK
       run: |
@@ -273,6 +265,7 @@ jobs:
       run: |
         echo "ANDROID_HOME=$ANDROID_HOME"
         echo "PATH=$PATH"
+
 
 
   build-ipa:
