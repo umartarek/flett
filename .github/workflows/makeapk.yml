@@ -32,10 +32,10 @@ jobs:
           if [ ! -f buildozer.spec ]; then
             buildozer init
           fi
-          sed -i 's/^# (android\.requirements).*/\1 = python3,kivy,flet/' buildozer.spec
-          sed -i 's/^# (title =).*/\1 MyFletApp/' buildozer.spec
-          sed -i 's/^# (package.name =).*/\1 myfletapp/' buildozer.spec
-          sed -i 's/^# (package.domain =).*/\1 org.example/' buildozer.spec
+          sed -i 's/^# \(android\.requirements\).*/\1 = python3,kivy,flet/' buildozer.spec
+          sed -i 's/^# \(title =\).*/\1 MyFletApp/' buildozer.spec
+          sed -i 's/^# \(package\.name =\).*/\1 myfletapp/' buildozer.spec
+          sed -i 's/^# \(package\.domain =\).*/\1 org.example/' buildozer.spec
 
       - name: Build APK
         run: |
