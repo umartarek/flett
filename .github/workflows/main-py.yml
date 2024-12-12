@@ -16,7 +16,7 @@ env:
   BUILD_VERSION: 1.0.0
   PYTHON_VERSION: 3.12.2
   FLUTTER_VERSION: 3.24.0
-  ANDROID_STUDIO_VERSION: 4.1.1
+  ANDROID_STUDIO_VERSION: 2023.2.1  # Latest stable version
 
 jobs:
   build-linux:
@@ -186,12 +186,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'  # Consider using the latest Temurin version
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          sdk-version: 35
+          # Consider using the latest stable Android SDK version
+          sdk-version: 36
           accept-licenses: true
 
       - name: Set Android SDK Path
@@ -200,7 +201,7 @@ jobs:
           echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
       - name: Install Android SDK Components
         run: |
-          yes | sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          yes | sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Install System Dependencies
         run: |
@@ -230,30 +231,37 @@ jobs:
             libxi-dev \
             xorg-dev
 
-      - name: Install Android Studio and SDK
+      - name: Install Android Studio (Optional)
+        # This step is optional and can be removed if you prefer using the pre-installed Flutter toolchain
         run: |
-          # Create directory for Android Studio
+          # Create directory for Android Studio (Optional)
           sudo mkdir -p /opt/android-studio
 
-          # Download Android Studio
+          # Download Android Studio (Optional)
           wget https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.2.1.23/android-studio-2023.2.1.23-linux.tar.gz
 
-          # Extract Android Studio
+          # Extract Android Studio (Optional)
           sudo tar -xzf android-studio-2023.2.1.23-linux.tar.gz -C /opt/android-studio --strip-components=1
 
-          # Set environment variables
+          # Set environment variables (Optional)
           echo "ANDROID_HOME=/opt/android-studio/bin" >> $GITHUB_ENV
           echo "PATH=$PATH:/opt/android-studio/bin" >> $GITHUB_ENV
 
-      - name: Setup Flutter ${{ env.FLUTTER_VERSION }}
+      - name: Setup Flutter (Consider using the latest stable version)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version: '3.x'  # Update with the latest stable Flutter version
 
-      - name: Setup Python ${{ env.PYTHON_VERSION }}
+      - name: Setup Python (Consider using the latest Python 3.x version)
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: '3.x'  # Update with the latest Python 3.x version
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
       - name: Flet Build APK
         run: |
           flutter config --no-analytics
