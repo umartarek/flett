@@ -179,100 +179,51 @@ jobs:
   build-apk:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'  # Consider using the latest Temurin version
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          # Consider using the latest stable Android SDK version
-          sdk-version: 36
-          accept-licenses: true
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        sdk-version: 36
+        accept-licenses: true
 
-      - name: Set Android SDK Path
-        run: |
-          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
-      - name: Install Android SDK Components
-        run: |
-          yes | sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+    - name: Install Android SDK Components
+      run: |
+        echo "y" | sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
-      - name: Install System Dependencies
-        run: |
-          # Update package lists
-          sudo apt-get update -y
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.x'
 
-          # Install essential build tools
-          sudo apt-get install -y \
-            software-properties-common \
-            build-essential \
-            wget \
-            curl \
-            git \
-            unzip \
-            xz-utils
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
 
-          # Install Ninja build tool
-          sudo apt-get install -y ninja-build
+    - name: Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-          # Install GTK and other desktop development libraries
-          sudo apt-get install -y \
-            libgtk-3-dev \
-            libglu1-mesa \
-            mesa-common-dev \
-            libx11-dev \
-            libxrandr-dev \
-            libxi-dev \
-            xorg-dev
+    - name: Flet Build APK
+      run: |
+        flutter config --no-analytics
+        flet build apk --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION
 
-      - name: Install Android Studio (Optional)
-        # This step is optional and can be removed if you prefer using the pre-installed Flutter toolchain
-        run: |
-          # Create directory for Android Studio (Optional)
-          sudo mkdir -p /opt/android-studio
-
-          # Download Android Studio (Optional)
-          wget https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.2.1.23/android-studio-2023.2.1.23-linux.tar.gz
-
-          # Extract Android Studio (Optional)
-          sudo tar -xzf android-studio-2023.2.1.23-linux.tar.gz -C /opt/android-studio --strip-components=1
-
-          # Set environment variables (Optional)
-          echo "ANDROID_HOME=/opt/android-studio/bin" >> $GITHUB_ENV
-          echo "PATH=$PATH:/opt/android-studio/bin" >> $GITHUB_ENV
-
-      - name: Setup Flutter (Consider using the latest stable version)
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.x'  # Update with the latest stable Flutter version
-
-      - name: Setup Python (Consider using the latest Python 3.x version)
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'  # Update with the latest Python 3.x version
-
-      - name: Install Python Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Flet Build APK
-        run: |
-          flutter config --no-analytics
-          flet build apk --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: apk-build-artifact
-          path: build/apk
-          if-no-files-found: warn
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: apk-build-artifact
+        path: build/apk
+        if-no-files-found: warn
 
   build-ipa:
     runs-on: macos-latest
