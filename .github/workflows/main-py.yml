@@ -253,7 +253,7 @@ jobs:
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ env }}
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Flet Build APK
         run: |
           flutter config --no-analytics
