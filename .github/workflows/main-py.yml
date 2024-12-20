@@ -1,22 +1,17 @@
 name: All Builds (Linux, macOS, Windows, Android, IPA, APK, AAB)
 
 on:
-  # Runs on push to any of the below branches
   push:
     branches:
       - master
       - main
-  # Runs on pull request events that target one of the below branches
   pull_request:
     branches:
       - master
       - main
-
-  # Allows you to run this workflow manually from the Actions tab of the repository
   workflow_dispatch:
 
 env:
-  # https://flet.dev/docs/publish#versioning
   BUILD_NUMBER: 1
   BUILD_VERSION: 1.0.0
   PYTHON_VERSION: 3.12.2
@@ -45,16 +40,20 @@ jobs:
       with:
         flutter-version: ${{ env.FLUTTER_VERSION }}
 
-    - name: Patch for linux build
+    - name: Install Android Studio
       run: |
-        flutter doctor
-        sudo apt-get update -y
-        sudo apt-get install -y ninja-build libgtk-3-dev
-        flutter doctor
+        sudo apt update -y
+        sudo apt install -y wget unzip
+        wget https://dl.google.com/dl/android/studio/ide-zips/2023.1.1.20/android-studio-2023.1.1.20-linux.tar.gz
+        tar -xvzf android-studio-2023.1.1.20-linux.tar.gz -C /opt
+        /opt/android-studio/bin/studio.sh &
+        sleep 30
+        yes | /opt/android-studio/bin/sdkmanager --licenses
+        /opt/android-studio/bin/sdkmanager "platforms;android-33" "build-tools;33.0.0"
 
     - name: Flet Build Linux
       run: |
-        flutter config --no-analytics 
+        flutter config --no-analytics
         flet build linux --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION
 
     - name: Upload Linux Artifact
@@ -62,8 +61,6 @@ jobs:
       with:
         name: linux-build-artifact
         path: build/linux
-        if-no-files-found: warn
-        overwrite: false
 
   build-macos:
     runs-on: macos-latest
@@ -87,6 +84,10 @@ jobs:
       with:
         flutter-version: ${{ env.FLUTTER_VERSION }}
 
+    - name: Install Android Studio
+      run: |
+        brew install --cask android-studio
+
     - name: Flet Build macOS
       run: |
         flutter config --no-analytics
@@ -97,8 +98,6 @@ jobs:
       with:
         name: macos-build-artifact
         path: build/macos
-        if-no-files-found: warn
-        overwrite: false
 
   build-windows:
     runs-on: windows-latest
@@ -122,6 +121,11 @@ jobs:
       with:
         flutter-version: ${{ env.FLUTTER_VERSION }}
 
+    - name: Install Android Studio
+      run: |
+        choco install android-studio --confirm
+        android-studio --install
+
     - name: Flet Build Windows
       run: |
         flutter config --no-analytics
@@ -132,8 +136,6 @@ jobs:
       with:
         name: windows-build-artifact
         path: build/windows
-        if-no-files-found: warn
-        overwrite: false
 
   build-aab:
     runs-on: macos-latest
@@ -157,6 +159,10 @@ jobs:
       with:
         flutter-version: ${{ env.FLUTTER_VERSION }}
 
+    - name: Install Android Studio
+      run: |
+        brew install --cask android-studio
+
     - name: Flet Build AAB
       run: |
         flutter config --no-analytics
@@ -167,8 +173,6 @@ jobs:
       with:
         name: aab-build-artifact
         path: build/aab
-        if-no-files-found: warn
-        overwrite: false
 
   build-apk:
     runs-on: ubuntu-latest
@@ -198,6 +202,17 @@ jobs:
         distribution: 'temurin'
         java-version: '21'
 
+    - name: Install Android Studio
+      run: |
+        sudo apt update -y
+        sudo apt install -y wget unzip
+        wget https://dl.google.com/dl/android/studio/ide-zips/2023.1.1.20/android-studio-2023.1.1.20-linux.tar.gz
+        tar -xvzf android-studio-2023.1.1.20-linux.tar.gz -C /opt
+        /opt/android-studio/bin/studio.sh &
+        sleep 30
+        yes | /opt/android-studio/bin/sdkmanager --licenses
+        /opt/android-studio/bin/sdkmanager "platforms;android-33" "build-tools;33.0.0"
+
     - name: Flet Build APK
       run: |
         flutter config --no-analytics
@@ -208,8 +223,6 @@ jobs:
       with:
         name: apk-build-artifact
         path: build/apk
-        if-no-files-found: warn
-        overwrite: false
 
   build-ipa:
     runs-on: macos-latest
@@ -233,6 +246,10 @@ jobs:
       with:
         flutter-version: ${{ env.FLUTTER_VERSION }}
 
+    - name: Install Android Studio
+      run: |
+        brew install --cask android-studio
+
     - name: Flet Build IPA
       run: |
         flutter config --no-analytics
@@ -243,5 +260,3 @@ jobs:
       with:
         name: ipa-build-artifact
         path: build/ipa
-        if-no-files-found: warn
-        overwrite: false
