@@ -170,7 +170,7 @@ jobs:
         if-no-files-found: warn
         overwrite: false
 
-build-apk:
+  build-apk:
     runs-on: ubuntu-latest
 
     steps:
@@ -198,16 +198,6 @@ build-apk:
         distribution: 'temurin'
         java-version: '21'
 
-    - name: Install Android Studio
-      run: |
-        sudo apt update
-        sudo apt install -y unzip wget
-        wget https://dl.google.com/dl/android/studio/ide-zips/2022.3.1.19/android-studio-2022.3.1.19-linux.tar.gz
-        tar -xvzf android-studio-2022.3.1.19-linux.tar.gz
-        sudo mv android-studio /usr/local/
-        export PATH=$PATH:/usr/local/android-studio/bin
-        sudo /usr/local/android-studio/bin/studio.sh &
-
     - name: Flet Build APK
       run: |
         flutter config --no-analytics
@@ -220,46 +210,6 @@ build-apk:
         path: build/apk
         if-no-files-found: warn
         overwrite: false
-
-  build-aab:
-    runs-on: macos-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-
-    - name: Install Python Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Setup Flutter ${{ env.FLUTTER_VERSION }}
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: ${{ env.FLUTTER_VERSION }}
-
-    - name: Install Android Studio
-      run: |
-        brew install --cask android-studio
-
-    - name: Flet Build AAB
-      run: |
-        flutter config --no-analytics
-        flet build aab --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION
-
-    - name: Upload AAB Artifact
-      uses: actions/upload-artifact@v4.3.4
-      with:
-        name: aab-build-artifact
-        path: build/aab
-        if-no-files-found: warn
-        overwrite: false
-
 
   build-ipa:
     runs-on: macos-latest
@@ -294,4 +244,4 @@ build-apk:
         name: ipa-build-artifact
         path: build/ipa
         if-no-files-found: warn
-        overwrite: false
+        overwrite: fals
