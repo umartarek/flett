@@ -40,13 +40,13 @@ jobs:
       with:
         flutter-version: ${{ env.FLUTTER_VERSION }}
 
-    - name: Install Android Studio
+    - name: Install Android Studio (Linux)
       run: |
         sudo apt update -y
-        sudo apt install -y wget unzip
+        sudo apt install -y wget unzip openjdk-11-jdk
         wget https://dl.google.com/dl/android/studio/ide-zips/2023.1.1.20/android-studio-2023.1.1.20-linux.tar.gz
         tar -xvzf android-studio-2023.1.1.20-linux.tar.gz -C /opt
-        /opt/android-studio/bin/studio.sh &
+        sudo /opt/android-studio/bin/studio.sh &
         sleep 30
         yes | /opt/android-studio/bin/sdkmanager --licenses
         /opt/android-studio/bin/sdkmanager "platforms;android-33" "build-tools;33.0.0"
@@ -84,7 +84,7 @@ jobs:
       with:
         flutter-version: ${{ env.FLUTTER_VERSION }}
 
-    - name: Install Android Studio
+    - name: Install Android Studio (macOS)
       run: |
         brew install --cask android-studio
 
@@ -121,10 +121,11 @@ jobs:
       with:
         flutter-version: ${{ env.FLUTTER_VERSION }}
 
-    - name: Install Android Studio
+    - name: Install Android Studio (Windows)
       run: |
         choco install android-studio --confirm
         android-studio --install
+        android-studio --create-shortcut
 
     - name: Flet Build Windows
       run: |
@@ -136,127 +137,3 @@ jobs:
       with:
         name: windows-build-artifact
         path: build/windows
-
-  build-aab:
-    runs-on: macos-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-
-    - name: Install Python Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Setup Flutter ${{ env.FLUTTER_VERSION }}
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: ${{ env.FLUTTER_VERSION }}
-
-    - name: Install Android Studio
-      run: |
-        brew install --cask android-studio
-
-    - name: Flet Build AAB
-      run: |
-        flutter config --no-analytics
-        flet build aab --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION
-
-    - name: Upload AAB Artifact
-      uses: actions/upload-artifact@v4.3.4
-      with:
-        name: aab-build-artifact
-        path: build/aab
-
-  build-apk:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-
-    - name: Install Python Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Setup Flutter ${{ env.FLUTTER_VERSION }}
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: ${{ env.FLUTTER_VERSION }}
-
-    - name: Setup Java JDK
-      uses: actions/setup-java@v4.2.1
-      with:
-        distribution: 'temurin'
-        java-version: '21'
-
-    - name: Install Android Studio
-      run: |
-        sudo apt update -y
-        sudo apt install -y wget unzip
-        wget https://dl.google.com/dl/android/studio/ide-zips/2023.1.1.20/android-studio-2023.1.1.20-linux.tar.gz
-        tar -xvzf android-studio-2023.1.1.20-linux.tar.gz -C /opt
-        /opt/android-studio/bin/studio.sh &
-        sleep 30
-        yes | /opt/android-studio/bin/sdkmanager --licenses
-        /opt/android-studio/bin/sdkmanager "platforms;android-33" "build-tools;33.0.0"
-
-    - name: Flet Build APK
-      run: |
-        flutter config --no-analytics
-        flet build apk --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION
-
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4.3.4
-      with:
-        name: apk-build-artifact
-        path: build/apk
-
-  build-ipa:
-    runs-on: macos-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-
-    - name: Install Python Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Setup Flutter ${{ env.FLUTTER_VERSION }}
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: ${{ env.FLUTTER_VERSION }}
-
-    - name: Install Android Studio
-      run: |
-        brew install --cask android-studio
-
-    - name: Flet Build IPA
-      run: |
-        flutter config --no-analytics
-        flet build ipa --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION 
-
-    - name: Upload IPA Artifact
-      uses: actions/upload-artifact@v4.3.4
-      with:
-        name: ipa-build-artifact
-        path: build/ipa
